@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Pendulum - Control Simulations</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .form-row label {
+            flex: 1;
+        }
+
+        .form-row input,
+        .form-row select {
+            flex: 1;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Basic Pendulum</h1>
+    </div>
+
+    <div class="container">
+        <a href="/" class="nav-link">&larr; Back to Dashboard</a>
+
+        <div class="sim-layout">
+            <div class="panel" style="flex: 2; position: relative;">
+                <h3>Simulation</h3>
+                <div class="toggle-group" style="align-items: center;">
+                    <button id="playPauseBtn"
+                        style="padding: 8px 16px; font-weight: bold; background-color: #d73a49; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: 0.2s;">
+                        ⏹ Stop Simulation
+                    </button>
+                    <label class="toggle-label" style="margin-left: 15px;"><input type="checkbox" id="showClockCheck">
+                        Show Clock</label>
+                    <label class="toggle-label"><input type="checkbox" id="panZoomCheck"> Pan-Zoom enabled</label>
+                </div>
+                <!-- Disable right click natively so we can use wheel click peacefully -->
+                <canvas id="simCanvas" oncontextmenu="return false;"></canvas>
+            </div>
+
+            <div class="panel" style="flex: 1; min-width: 300px;">
+                <h3>Physics Controls</h3>
+
+                <div class="control-group">
+                    <label>Length ($l$): <span id="lengthVal">1.00</span> m</label>
+                    <input type="range" id="lengthRange" min="0.1" max="3.0" step="0.05" value="1.00">
+                </div>
+                <div class="control-group">
+                    <label>Mass ($m$): <span id="massVal">1.00</span> kg</label>
+                    <input type="range" id="massRange" min="0.1" max="5.0" step="0.1" value="1.00">
+                </div>
+                <div class="control-group">
+                    <label>Damping ($c$): <span id="dampingVal">0.00</span></label>
+                    <input type="range" id="dampingRange" min="0.0" max="2.0" step="0.01" value="0.00">
+                </div>
+                <div class="control-group">
+                    <label>Gravity ($g$): <span id="gravityVal">9.80</span> m/s²</label>
+                    <input type="range" id="gravityRange" min="0.0" max="30.0" step="0.1" value="9.80">
+                </div>
+                <h3 style="margin-top: 30px;">Simulation Settings</h3>
+                <div class="form-row">
+                    <label>Diff Eq Solver:</label>
+                    <select id="solverSelect">
+                        <option value="modified_euler" selected>Modified Euler</option>
+                        <option value="euler">Euler</option>
+                        <option value="rk4">Runge-Kutta 4</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Time Step (dt):</label>
+                    <input type="number" id="timeStepInput" value="0.025" step="0.001">
+                </div>
+                <div class="form-row">
+                    <label>Time Rate:</label>
+                    <input type="number" id="timeRateInput" value="1.00" step="0.1">
+                </div>
+
+                <p style="color: var(--text-secondary); font-size: 0.85em; margin-top: 20px;">
+                    Interaction:<br>
+                    - <b>Left Click & Drag</b>: Grabs the bob. Letting go drops the bob from that angle.<br>
+                    - <b>Right Click</b>: Applies an instantaneous push in the direction from the pivot to the
+                    cursor.<br>
+                    - <b>Middle click/mouse wheel</b> to pan/zoom if enabled.
+                </p>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-top: 20px;">
+            <h3>Real-time Metrics: Angle vs. Time</h3>
+            <div class="chart-container">
+                <canvas id="chartCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/basic_pendulum.js?v=6"></script>
+</body>
+
+</html>
