@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
     <div class="header">
         <h1>Inverted Pendulum (PID)</h1>
@@ -15,7 +17,7 @@
 
     <div class="container">
         <a href="/" class="nav-link">&larr; Back to Dashboard</a>
-        
+
         <div class="sim-layout">
             <div class="panel">
                 <h3>Simulation</h3>
@@ -24,7 +26,7 @@
                     <button id="togglePIDBtn" class="btn off">PID: OFF</button>
                 </div>
             </div>
-            
+
             <div class="panel">
                 <h3>PID Controller Tuning</h3>
                 <div class="control-group">
@@ -40,9 +42,11 @@
                     <input type="range" id="kdRange" min="0" max="50" step="0.5" value="10.0">
                 </div>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-top: 20px;">
-                    Goal: Balance the pendulum perfectly upright ($\theta = \pi$). Turn the PID ON, and challenge it by dragging the mass left or right!
+                    Goal: Balance the pendulum perfectly upright ($\theta = \pi$). Turn the PID ON, and challenge it by
+                    dragging the mass left or right!
                 </p>
-                <div style="background-color: var(--bg-color); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 10px;">
+                <div
+                    style="background-color: var(--bg-color); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 10px;">
                     <span style="color: var(--text-secondary);">Current Control Torque: </span>
                     <span id="torqueDisplay" style="color: var(--success-color); font-weight: bold;">0.00</span>
                 </div>
@@ -58,4 +62,5 @@
     </div>
     <script src="/static/js/inverted_pendulum.js"></script>
 </body>
+
 </html>

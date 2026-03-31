@@ -68,6 +68,19 @@ async def websocket_basic(websocket: WebSocket):
                     
                 if "is_paused" in parsed:
                     state["paused"] = bool(parsed["is_paused"])
+                    
+                if "reset" in parsed:
+                    pendulum.theta = 0.0
+                    pendulum.omega = 0.0
+                    pendulum.time = 0.0
+                    pendulum.m = 1.0
+                    pendulum.l = 1.0
+                    pendulum.damping = 0.0
+                    pendulum.g = 9.80
+                    pendulum.solver = "modified_euler"
+                    state["time_step"] = 0.025
+                    state["time_rate"] = 1.0
+                    state["paused"] = False
 
         except WebSocketDisconnect:
             state["running"] = False

@@ -20,15 +20,68 @@ const timeStepInput = getElem('timeStepInput');
 const timeRateInput = getElem('timeRateInput');
 
 const showClockCheck = getElem('showClockCheck');
+const showAngleCheck = getElem('showAngleCheck');
 const panZoomCheck = getElem('panZoomCheck');
 const playPauseBtn = getElem('playPauseBtn');
+const resetBtn = getElem('resetBtn');
 
 let isPaused = false;
 playPauseBtn.addEventListener('click', () => {
     isPaused = !isPaused;
     playPauseBtn.innerHTML = isPaused ? "▶ Start Simulation" : "⏹ Stop Simulation";
     playPauseBtn.style.backgroundColor = isPaused ? "#bc8cff" : "#d73a49";
+
+    // Toggle reset button state
+    resetBtn.disabled = !isPaused;
+    resetBtn.style.opacity = isPaused ? "1" : "0.5";
+    resetBtn.style.cursor = isPaused ? "pointer" : "not-allowed";
+
     sendVal('is_paused', isPaused);
+});
+
+resetBtn.addEventListener('click', () => {
+    if (!isPaused) return; // Only allow reset when paused
+
+    // Reset sliders and inputs
+    lengthRange.value = "1.00"; lengthVal.textContent = "1.00";
+    massRange.value = "1.00"; massVal.textContent = "1.00";
+    dampingRange.value = "0.00"; dampingVal.textContent = "0.00";
+    gravityRange.value = "9.80"; gravityVal.textContent = "9.80";
+    
+    solverSelect.value = "modified_euler";
+    timeStepInput.value = "0.025";
+    timeRateInput.value = "1.00";
+
+    // Reset play/pause state
+    isPaused = false;
+    playPauseBtn.innerHTML = "⏹ Stop Simulation";
+    playPauseBtn.style.backgroundColor = "#d73a49";
+    resetBtn.disabled = true;
+    resetBtn.style.opacity = "0.5";
+    resetBtn.style.cursor = "not-allowed";
+
+    // Clear chart
+    if (typeof chart !== 'undefined') {
+        chart.data.labels = [];
+        chart.data.datasets[0].data = [];
+        chart.update();
+    }
+    if (typeof degreeChart !== 'undefined') {
+        degreeChart.data.labels = [];
+        degreeChart.data.datasets[0].data = [];
+        degreeChart.update();
+    }
+    
+    // Clear visuals and camera
+    rightClickVisuals = [];
+    camera.x = width / 2;
+    camera.y = 100;
+    camera.zoom = 100;
+
+    // Send reset message to backend
+    if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ reset: true }));
+    }
 });
 
 // Network
@@ -68,9 +121,35 @@ const chart = new Chart(ctxChart, {
     data: {
         labels: [],
         datasets: [{
-            label: 'Angle (rad)',
+            label: 'Angular Velocity (rad/s)',
             data: [],
             borderColor: '#58a6ff',
+            borderWidth: 2,
+            tension: 0.4,
+            pointRadius: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        scales: {
+            x: { display: false },
+            y: { grid: { color: '#30363d' }, ticks: { color: '#c9d1d9' } }
+        },
+        plugins: { legend: { labels: { color: '#c9d1d9' } } }
+    }
+});
+
+const ctxDegreeChart = document.getElementById('degreeChartCanvas').getContext('2d');
+const degreeChart = new Chart(ctxDegreeChart, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Angle (degrees)',
+            data: [],
+            borderColor: '#ff7b72',
             borderWidth: 2,
             tension: 0.4,
             pointRadius: 0
@@ -99,14 +178,26 @@ ws.onmessage = (event) => {
     // Chart update only if time advances (simulation is running)
     if (timeChanged || isDraggingBob) {
         const maxDataPoints = 3125; // Store 50 seconds at ~60fps
-        chart.data.labels.push(data.time.toFixed(2));
         
-        chart.data.datasets[0].data.push(data.theta);
+        let rads = data.theta % (2 * Math.PI);
+        if (rads > Math.PI) rads -= 2 * Math.PI;
+        else if (rads < -Math.PI) rads += 2 * Math.PI;
+        const degs = rads * 180 / Math.PI;
+
+        chart.data.labels.push(data.time.toFixed(2));
+        degreeChart.data.labels.push(data.time.toFixed(2));
+        
+        chart.data.datasets[0].data.push(data.omega);
+        degreeChart.data.datasets[0].data.push(degs);
+        
         if (chart.data.labels.length > maxDataPoints) {
             chart.data.labels.shift();
             chart.data.datasets[0].data.shift();
+            degreeChart.data.labels.shift();
+            degreeChart.data.datasets[0].data.shift();
         }
         chart.update();
+        degreeChart.update();
     }
 
     drawSim();
@@ -168,7 +259,9 @@ simCanvas.addEventListener('mousedown', (e) => {
 
         // Tangent vector for increasing theta is (cos(theta), -sin(theta))
         const tangentialForce = dx * Math.cos(currentState.theta) - dy * Math.sin(currentState.theta);
-        const impulse = tangentialForce * 0.005; // Scaling factor
+        
+        // Increased the scaling factor significantly so right click provides a satisfying, visible kick
+        const impulse = tangentialForce * 0.05; 
         
         rightClickVisuals.push({x: pos.x, y: pos.y, alpha: 1.0, rad: 0});
 
@@ -216,13 +309,40 @@ function drawSim() {
     const px = camera.x + camera.zoom * l_vis * Math.sin(currentState.theta);
     const py = camera.y + camera.zoom * l_vis * Math.cos(currentState.theta);
 
-    // Draw reference line optionally
-    ctx.strokeStyle = 'rgba(139, 148, 158, 0.3)';
+    // Draw Compass (Protractor)
+    ctx.strokeStyle = 'rgba(139, 148, 158, 0.2)';
     ctx.lineWidth = 1;
+    const compassRadius = camera.zoom * 1.5; // 1.5m radius compass visually
     ctx.beginPath();
-    ctx.moveTo(camera.x, camera.y);
-    ctx.lineTo(camera.x, camera.y + camera.zoom * 3);
+    ctx.arc(camera.x, camera.y, compassRadius, 0, Math.PI * 2);
     ctx.stroke();
+
+    ctx.fillStyle = 'rgba(139, 148, 158, 0.6)';
+    ctx.font = '11px Inter';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    for (let angleDeg = -180; angleDeg < 180; angleDeg += 30) {
+        let angleRad = angleDeg * Math.PI / 180;
+        let cx = camera.x + compassRadius * Math.sin(angleRad);
+        let cy = camera.y + compassRadius * Math.cos(angleRad);
+        let ix = camera.x + (compassRadius - 10) * Math.sin(angleRad);
+        let iy = camera.y + (compassRadius - 10) * Math.cos(angleRad);
+        let tx = camera.x + (compassRadius + 18) * Math.sin(angleRad);
+        let ty = camera.y + (compassRadius + 18) * Math.cos(angleRad);
+
+        ctx.strokeStyle = 'rgba(139, 148, 158, 0.4)';
+        ctx.beginPath();
+        ctx.moveTo(ix, iy);
+        ctx.lineTo(cx, cy);
+        ctx.stroke();
+        
+        ctx.fillText(`${angleDeg}°`, tx, ty);
+    }
+
+    // Restore text align for UI elements
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
 
     // Draw pivot
     ctx.fillStyle = '#8b949e';
@@ -265,10 +385,24 @@ function drawSim() {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Draw clock
+    // Draw clock and angle
+    let textY = 30;
+    ctx.fillStyle = '#c9d1d9';
+    ctx.font = '16px Inter';
+
     if (showClockCheck.checked) {
-        ctx.fillStyle = '#c9d1d9';
-        ctx.font = '16px Inter';
-        ctx.fillText(`Time: ${currentState.time.toFixed(2)} s`, 20, 30);
+        ctx.fillText(`Time: ${currentState.time.toFixed(2)} s`, 20, textY);
+        textY += 24;
+    }
+
+    if (showAngleCheck && showAngleCheck.checked) {
+        // Normalize theta to [-pi, pi] for display
+        let rads = currentState.theta % (2 * Math.PI);
+        if (rads > Math.PI) rads -= 2 * Math.PI;
+        else if (rads < -Math.PI) rads += 2 * Math.PI;
+
+        const degs = rads * 180 / Math.PI;
+        // Using string interpolation for text
+        ctx.fillText(`Angle: ${degs.toFixed(1)}° (${rads.toFixed(2)} rad)`, 20, textY);
     }
 }
