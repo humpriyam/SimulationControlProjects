@@ -105,15 +105,19 @@ async def websocket_basic(websocket: WebSocket):
 @app.websocket("/ws/inverted")
 async def websocket_inverted(websocket: WebSocket):
     await websocket.accept()
-    pendulum = InvertedPendulum(mass=1.0, length=1.0)
-    # Start with realistic PID tunings for a pendulum balancing up
-    pid = PIDController(kp=50.0, ki=0.0, kd=10.0)
+    pendulum = InvertedPendulum(mass=1.0, length=1.0, cart_mass=2.0)
+    # Start with realistic PID tunings for a cart-pole balancing up
+    pid = PIDController(kp=100.0, ki=0.0, kd=20.0)
     dt = 0.016
     
     state = {
         "running": True,
         "pid_on": False,
-        "disturbance": 0.0
+        "is_dragging_cart": False,
+        "drag_cart_target": 0.0,
+        "is_dragging_bob": False,
+        "drag_bob_target": 0.0,
+        "paused": False
     }
     
     async def listen_for_updates():
@@ -131,8 +135,40 @@ async def websocket_inverted(websocket: WebSocket):
                     state["pid_on"] = bool(parsed["pid_on"])
                     if not state["pid_on"]:
                         pid.reset()
-                if "disturbance" in parsed:
-                    pendulum.omega += float(parsed["disturbance"])
+                if "track_limit" in parsed:
+                    pendulum.track_limit = float(parsed["track_limit"])
+                if "cart_mass" in parsed:
+                    pendulum.M = float(parsed["cart_mass"])
+                if "mass" in parsed:
+                    pendulum.m = float(parsed["mass"])
+                if "length" in parsed:
+                    pendulum.l = float(parsed["length"])
+                    
+                if "drag_cart_x" in parsed:
+                    state["is_dragging_cart"] = True
+                    state["drag_cart_target"] = max(-pendulum.track_limit, min(float(parsed["drag_cart_x"]), pendulum.track_limit))
+                if "drag_bob_theta" in parsed:
+                    state["is_dragging_bob"] = True
+                    state["drag_bob_target"] = float(parsed["drag_bob_theta"])
+                    
+                if "release_drag" in parsed:
+                    state["is_dragging_cart"] = False
+                    state["is_dragging_bob"] = False
+                    
+                if "action" in parsed:
+                    action = parsed["action"]
+                    if action == "pause":
+                        state["paused"] = True
+                    elif action == "play":
+                        state["paused"] = False
+                    elif action == "reset":
+                        state["paused"] = True
+                        pendulum.x = 0.0
+                        pendulum.x_dot = 0.0
+                        pendulum.theta = 0.0
+                        pendulum.theta_dot = 0.0
+                        pid.reset()
+                    
         except WebSocketDisconnect:
             state["running"] = False
 
@@ -140,27 +176,51 @@ async def websocket_inverted(websocket: WebSocket):
 
     try:
         while state["running"]:
-            if state["pid_on"]:
-                # Error is difference between target (pi) and current theta
-                target_angle = 3.141592653589793
-                error = target_angle - pendulum.theta
-                
-                # Normalize error to [-pi, pi]
-                while error > 3.141592653589793:
-                    error -= 2 * 3.141592653589793
-                while error < -3.141592653589793:
-                    error += 2 * 3.141592653589793
-                
-                control_torque = pid.update(error, dt)
+            if state["paused"]:
+                if state["is_dragging_cart"]:
+                    pendulum.x = state["drag_cart_target"]
+                    pendulum.x_dot = 0.0
+                if state["is_dragging_bob"]:
+                    pendulum.theta = state["drag_bob_target"]
+                    pendulum.theta_dot = 0.0
+                control_force = 0.0
             else:
-                control_torque = 0.0
+                if state["is_dragging_cart"]:
+                    cart_error = state["drag_cart_target"] - pendulum.x
+                    limited_error = max(-2.0, min(cart_error, 2.0))
+                    control_force = 500.0 * limited_error - 50.0 * pendulum.x_dot
+                    pendulum.step(dt, control_force)
+                    
+                elif state["is_dragging_bob"]:
+                    pendulum.theta = state["drag_bob_target"]
+                    pendulum.theta_dot = 0.0
+                    pendulum.step(dt, 0.0)
+                    pendulum.theta = state["drag_bob_target"]
+                    
+                else:
+                    if state["pid_on"]:
+                        target_angle = 0.0
+                        error = target_angle - pendulum.theta
+                        pi_val = 3.141592653589793
+                        while error > pi_val:  error -= 2 * pi_val
+                        while error < -pi_val: error += 2 * pi_val
+                        control_force = pid.update(error, dt)
+                    else:
+                        control_force = 0.0
+                    
+                    pendulum.step(dt, control_force)
             
-            pendulum.step(dt, control_torque)
+            A, B = pendulum.get_state_space()
+            
             await websocket.send_json({
+                "x": pendulum.x,
+                "x_dot": pendulum.x_dot,
                 "theta": pendulum.theta,
-                "omega": pendulum.omega,
+                "theta_dot": pendulum.theta_dot,
                 "time": pendulum.time,
-                "torque": control_torque
+                "force": control_force,
+                "A": A,
+                "B": B
             })
             await asyncio.sleep(dt)
     except Exception as e:

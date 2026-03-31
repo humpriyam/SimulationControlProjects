@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
@@ -20,14 +21,66 @@
 
         <div class="sim-layout">
             <div class="panel">
-                <h3>Simulation</h3>
+                <div class="toolbar" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; background-color: #161b22; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: nowrap; overflow-x: auto;">
+                    <button id="playPauseBtn" class="btn" style="background-color: #238636; border: none; color: white; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">▶ Play</button>
+                    <button id="resetBtn" class="btn" style="background-color: #1f6feb; border: none; color: white; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">🔄 Reset</button>
+                    <div style="width: 1px; height: 18px; background-color: #30363d; margin: 0 4px;"></div>
+                    <button id="zoomInBtn" class="btn" style="background-color: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">Zoom +</button>
+                    <button id="zoomOutBtn" class="btn" style="background-color: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">Zoom -</button>
+                    <div style="flex-grow: 1;"></div>
+                    <label style="color: var(--text-secondary); font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;">
+                        <input type="checkbox" id="showAngleCheck" style="margin: 0;"> Angle
+                    </label>
+                </div>
                 <canvas id="simCanvas"></canvas>
-                <div style="margin-top: 15px;">
-                    <button id="togglePIDBtn" class="btn off">PID: OFF</button>
+                
+                <div class="controls-row" style="margin-top: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                    <button id="togglePIDBtn" class="btn off" style="flex-shrink: 0;">PID: OFF</button>
+                </div>
+                
+                <div style="margin-top: 15px; background-color: #0d1117; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+                    <h4 style="margin: 0 0 5px 0; color: #58a6ff; font-size: 14px;">Real-time State-Space (\(\dot{x} = A x + B u\))</h4>
+                    <p style="margin: 0 0 10px 0; font-size: 11px; color: #8b949e;">State Vector \(x = \begin{bmatrix} x_{\text{cart}} & \dot{x}_{\text{cart}} & \theta_{\text{pole}} & \dot{\theta}_{\text{pole}} \end{bmatrix}^T\)</p>
+                    <pre id="stateSpaceDisplay" style="margin: 0; font-family: monospace; font-size: 11px; color: #c9d1d9; overflow-x: auto;">Waiting for data...</pre>
+                    
+                    <div style="margin-top: 10px; font-size: 11px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 10px; overflow-x: auto;">
+                        <strong>Linearized Formulation:</strong><br>
+                        <div style="margin-top: 5px;">
+                        \( A = \begin{bmatrix} 
+                        0 & 1 & 0 & 0 \\ 
+                        0 & \frac{-b_c}{M} & \frac{-mg}{M} & \frac{b_p}{Ml} \\ 
+                        0 & 0 & 0 & 1 \\ 
+                        0 & \frac{b_c}{Ml} & \frac{(M+m)g}{Ml} & \frac{-b_p(M+m)}{Mm l^2} 
+                        \end{bmatrix} \quad 
+                        B = \begin{bmatrix} 
+                        0 \\ \frac{1}{M} \\ 0 \\ \frac{-1}{Ml} 
+                        \end{bmatrix} \)
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="panel">
+                <h3>Physical Parameters</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                    <div class="control-group" style="margin: 0;">
+                        <label>Track Limit (±m): <span id="trackVal">5.0</span></label>
+                        <input type="range" id="trackRange" min="1.0" max="10.0" step="0.5" value="5.0">
+                    </div>
+                    <div class="control-group" style="margin: 0;">
+                        <label>Cart Mass (kg): <span id="cartMassVal">2.0</span></label>
+                        <input type="range" id="cartMassRange" min="0.5" max="5.0" step="0.1" value="2.0">
+                    </div>
+                    <div class="control-group" style="margin: 0;">
+                        <label>Bob Mass (kg): <span id="bobMassVal">1.0</span></label>
+                        <input type="range" id="bobMassRange" min="0.1" max="5.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="control-group" style="margin: 0;">
+                        <label>Pole Length (m): <span id="lengthVal">1.0</span></label>
+                        <input type="range" id="lengthRange" min="0.5" max="3.0" step="0.1" value="1.0">
+                    </div>
+                </div>
+
                 <h3>PID Controller Tuning</h3>
                 <div class="control-group">
                     <label>Proportional ($K_p$): <span id="kpVal">50.0</span></label>
@@ -42,12 +95,11 @@
                     <input type="range" id="kdRange" min="0" max="50" step="0.5" value="10.0">
                 </div>
                 <p style="color: var(--text-secondary); font-size: 0.9em; margin-top: 20px;">
-                    Goal: Balance the pendulum perfectly upright ($\theta = \pi$). Turn the PID ON, and challenge it by
-                    dragging the mass left or right!
+                    Goal: Balance the pendulum perfectly upright (\(\theta = 0\)). Turn the PID ON, and challenge it by
+                    dragging the mass or the cart left and right!
                 </p>
-                <div
-                    style="background-color: var(--bg-color); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 10px;">
-                    <span style="color: var(--text-secondary);">Current Control Torque: </span>
+                <div style="background-color: var(--bg-color); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 10px;">
+                    <span style="color: var(--text-secondary);">PID Actuator Force: </span>
                     <span id="torqueDisplay" style="color: var(--success-color); font-weight: bold;">0.00</span>
                 </div>
             </div>
@@ -60,7 +112,7 @@
             </div>
         </div>
     </div>
-    <script src="/static/js/inverted_pendulum.js"></script>
+    <script src="/static/js/inverted_pendulum.js?v=4"></script>
 </body>
 
 </html>
