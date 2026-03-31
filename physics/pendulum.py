@@ -61,6 +61,8 @@ class InvertedPendulum:
         self.time = 0.0
         
         self.track_limit = 5.0 # default +/- 5 meters
+        self.at_limit_left = False
+        self.at_limit_right = False
 
     def _equations_of_motion(self, x, x_dot, theta, theta_dot, force):
         S = math.sin(theta)
@@ -77,10 +79,35 @@ class InvertedPendulum:
         # Limit force realistically
         max_force = 500.0
         force = max(-max_force, min(force, max_force))
-
-        # Euler step
-        x_ddot, theta_ddot = self._equations_of_motion(self.x, self.x_dot, self.theta, self.theta_dot, force)
         
+        # 1. Physical Constraint: If the cart is at a limit and the actuator tries 
+        # to push further, the stopper cancels the actuator's component completely.
+        self.at_limit_left = self.x <= -self.track_limit
+        self.at_limit_right = self.x >= self.track_limit
+        
+        effective_force = force
+        if (self.at_limit_right and force > 0) or (self.at_limit_left and force < 0):
+            effective_force = 0.0
+
+        # Equations of motion use 'effective_force' (Net Force including stopper reaction)
+        S = math.sin(self.theta)
+        C = math.cos(self.theta)
+        denom = self.M + self.m * S**2
+        
+        # Acceleration purely from effective_force (Net Result)
+        x_ddot = (effective_force + self.m * self.l * self.theta_dot**2 * S - self.m * self.g * S * C + (self.b_p / self.l) * C * self.theta_dot - self.b_c * self.x_dot) / denom
+        
+        # 2. Collision constraint: If we are at the limit and still have residual velocity 
+        # (e.g. from an impact), zero that out to simulate a perfectly inelastic stop.
+        if (self.at_limit_right and x_ddot > 0) or (self.at_limit_left and x_ddot < 0):
+            x_ddot = 0.0
+            if (self.at_limit_right and self.x_dot > 0) or (self.at_limit_left and self.x_dot < 0):
+                self.x_dot = 0.0
+
+        # 3. Calculate theta_ddot based on the (possibly constrained) x_ddot
+        theta_ddot = (self.g * S - x_ddot * C - (self.b_p / (self.m * self.l)) * self.theta_dot) / self.l
+
+        # 4. Integrate
         self.x_dot += x_ddot * dt
         self.theta_dot += theta_ddot * dt
         
@@ -91,15 +118,23 @@ class InvertedPendulum:
         while self.theta > math.pi: self.theta -= 2 * math.pi
         while self.theta < -math.pi: self.theta += 2 * math.pi
         
-        # Track limits (Inelastic collision)
+        # Safety hard-clamp for track limits
         if self.x > self.track_limit:
             self.x = self.track_limit
             self.x_dot = 0.0
+            self.at_limit_right = True
         elif self.x < -self.track_limit:
             self.x = -self.track_limit
             self.x_dot = 0.0
+            self.at_limit_left = True
+        else:
+            # Re-check flags if we aren't hard-clamping to avoid 'stickiness' 
+            # if we are just slightly within the limit.
+            self.at_limit_left = self.x <= -self.track_limit
+            self.at_limit_right = self.x >= self.track_limit
 
         self.time += dt
+        return effective_force
 
     def get_state_space(self):
         """ Returns the linearized A and B matrices (Python lists) at theta=0 """

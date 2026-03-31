@@ -6,10 +6,12 @@ class PIDController:
         self.integral = 0.0
         self.prev_error = 0.0
 
-    def update(self, error, dt):
-        self.integral += error * dt
+    def update(self, error, dt, clamp_integral=False):
+        # Only integrate if not clamped
+        if not clamp_integral:
+            self.integral += error * dt
         
-        # Anti-windup
+        # Anti-windup (saturation)
         max_integral = 50.0
         if self.integral > max_integral:
             self.integral = max_integral

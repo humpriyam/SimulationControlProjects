@@ -107,7 +107,7 @@ async def websocket_inverted(websocket: WebSocket):
     await websocket.accept()
     pendulum = InvertedPendulum(mass=1.0, length=1.0, cart_mass=2.0)
     # Start with realistic PID tunings for a cart-pole balancing up
-    pid = PIDController(kp=100.0, ki=0.0, kd=20.0)
+    pid = PIDController(kp=120.0, ki=2.5, kd=25.0)
     dt = 0.016
     
     state = {
@@ -189,7 +189,10 @@ async def websocket_inverted(websocket: WebSocket):
                     cart_error = state["drag_cart_target"] - pendulum.x
                     limited_error = max(-2.0, min(cart_error, 2.0))
                     control_force = 500.0 * limited_error - 50.0 * pendulum.x_dot
-                    pendulum.step(dt, control_force)
+                    effective_f = pendulum.step(dt, control_force)
+                    # For dragging, we still want to show the 'control_force' as the intent, 
+                    # but the effective force is what matters. Let's send effective_f.
+                    control_force = effective_f
                     
                 elif state["is_dragging_bob"]:
                     pendulum.theta = state["drag_bob_target"]
@@ -203,12 +206,23 @@ async def websocket_inverted(websocket: WebSocket):
                         error = target_angle - pendulum.theta
                         pi_val = 3.141592653589793
                         while error > pi_val:  error -= 2 * pi_val
-                        while error < -pi_val: error += 2 * pi_val
-                        control_force = pid.update(error, dt)
+                        # Anti-windup check: If at limit and pushing into it, stop integrating
+                        clamp = False
+                        if (pendulum.at_limit_right and error < 0) or (pendulum.at_limit_left and error > 0):
+                            # Note: error = target(0) - theta. 
+                            # If theta is slightly right (positive) and we are at the right limit, 
+                            # we want to move cart right to get under it. F > 0.
+                            # So we check if the CONTROLLER would want to push further.
+                            # Standard PID is F = Kp*e + Ki*Int + Kd*d.
+                            # If error and integral have the same sign and we are at the limit, clamp.
+                            clamp = True
+                            
+                        control_force = pid.update(error, dt, clamp_integral=clamp)
+                        effective_f = pendulum.step(dt, control_force)
+                        control_force = effective_f
                     else:
                         control_force = 0.0
-                    
-                    pendulum.step(dt, control_force)
+                        pendulum.step(dt, control_force)
             
             A, B = pendulum.get_state_space()
             

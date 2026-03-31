@@ -21,40 +21,65 @@
 
         <div class="sim-layout">
             <div class="panel">
-                <div class="toolbar" style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; background-color: #161b22; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: nowrap; overflow-x: auto;">
-                    <button id="playPauseBtn" class="btn" style="background-color: #238636; border: none; color: white; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">▶ Play</button>
-                    <button id="resetBtn" class="btn" style="background-color: #1f6feb; border: none; color: white; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">🔄 Reset</button>
+                <div class="toolbar"
+                    style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px; background-color: #161b22; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); flex-wrap: nowrap; overflow-x: auto;">
+                    <button id="playPauseBtn" class="btn"
+                        style="background-color: #238636; border: none; color: white; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">▶
+                        Play</button>
+                    <button id="resetBtn" class="btn"
+                        style="background-color: #1f6feb; border: none; color: white; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">🔄
+                        Reset Sim</button>
+                    <button id="clearChartBtn" class="btn"
+                        style="background-color: #6e7681; border: none; color: white; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; cursor: pointer; white-space: nowrap;">🗑️
+                        Clear Chart</button>
                     <div style="width: 1px; height: 18px; background-color: #30363d; margin: 0 4px;"></div>
-                    <button id="zoomInBtn" class="btn" style="background-color: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">Zoom +</button>
-                    <button id="zoomOutBtn" class="btn" style="background-color: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">Zoom -</button>
+                    <button id="zoomInBtn" class="btn"
+                        style="background-color: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">Zoom
+                        +</button>
+                    <button id="zoomOutBtn" class="btn"
+                        style="background-color: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">Zoom
+                        -</button>
+                    <button id="fitScreenBtn" class="btn"
+                        style="background-color: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer;">Fit
+                        to Screen</button>
+                    <button id="trackCartBtn" class="btn"
+                        style="background-color: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; margin-left: 5px;">Track Cart: OFF</button>
                     <div style="flex-grow: 1;"></div>
-                    <label style="color: var(--text-secondary); font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;">
-                        <input type="checkbox" id="showAngleCheck" style="margin: 0;"> Angle
+                    <label
+                        style="color: var(--text-secondary); font-size: 12px; display: flex; align-items: center; gap: 4px; cursor: pointer; white-space: nowrap;">
+                        <input type="checkbox" id="showAngleCheck" checked style="margin: 0;"> Angle
                     </label>
                 </div>
                 <canvas id="simCanvas"></canvas>
-                
-                <div class="controls-row" style="margin-top: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+
+                <div class="controls-row"
+                    style="margin-top: 15px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                     <button id="togglePIDBtn" class="btn off" style="flex-shrink: 0;">PID: OFF</button>
                 </div>
-                
-                <div style="margin-top: 15px; background-color: #0d1117; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
-                    <h4 style="margin: 0 0 5px 0; color: #58a6ff; font-size: 14px;">Real-time State-Space (\(\dot{x} = A x + B u\))</h4>
-                    <p style="margin: 0 0 10px 0; font-size: 11px; color: #8b949e;">State Vector \(x = \begin{bmatrix} x_{\text{cart}} & \dot{x}_{\text{cart}} & \theta_{\text{pole}} & \dot{\theta}_{\text{pole}} \end{bmatrix}^T\)</p>
-                    <pre id="stateSpaceDisplay" style="margin: 0; font-family: monospace; font-size: 11px; color: #c9d1d9; overflow-x: auto;">Waiting for data...</pre>
-                    
-                    <div style="margin-top: 10px; font-size: 11px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 10px; overflow-x: auto;">
+
+                <div
+                    style="margin-top: 15px; background-color: #0d1117; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+                    <h4 style="margin: 0 0 5px 0; color: #58a6ff; font-size: 14px;">Real-time State-Space (\(\dot{x} = A
+                        x + B u\))</h4>
+                    <p style="margin: 0 0 10px 0; font-size: 11px; color: #8b949e;">State Vector \(x = \begin{bmatrix}
+                        x_{\text{cart}} & \dot{x}_{\text{cart}} & \theta_{\text{pole}} & \dot{\theta}_{\text{pole}}
+                        \end{bmatrix}^T\)</p>
+                    <pre id="stateSpaceDisplay"
+                        style="margin: 0; font-family: monospace; font-size: 11px; color: #c9d1d9; overflow-x: auto;">Waiting for data...</pre>
+
+                    <div
+                        style="margin-top: 10px; font-size: 11px; color: #8b949e; border-top: 1px solid #30363d; padding-top: 10px; overflow-x: auto;">
                         <strong>Linearized Formulation:</strong><br>
                         <div style="margin-top: 5px;">
-                        \( A = \begin{bmatrix} 
-                        0 & 1 & 0 & 0 \\ 
-                        0 & \frac{-b_c}{M} & \frac{-mg}{M} & \frac{b_p}{Ml} \\ 
-                        0 & 0 & 0 & 1 \\ 
-                        0 & \frac{b_c}{Ml} & \frac{(M+m)g}{Ml} & \frac{-b_p(M+m)}{Mm l^2} 
-                        \end{bmatrix} \quad 
-                        B = \begin{bmatrix} 
-                        0 \\ \frac{1}{M} \\ 0 \\ \frac{-1}{Ml} 
-                        \end{bmatrix} \)
+                            \( A = \begin{bmatrix}
+                            0 & 1 & 0 & 0 \\
+                            0 & \frac{-b_c}{M} & \frac{-mg}{M} & \frac{b_p}{Ml} \\
+                            0 & 0 & 0 & 1 \\
+                            0 & \frac{b_c}{Ml} & \frac{(M+m)g}{Ml} & \frac{-b_p(M+m)}{Mm l^2}
+                            \end{bmatrix} \quad
+                            B = \begin{bmatrix}
+                            0 \\ \frac{1}{M} \\ 0 \\ \frac{-1}{Ml}
+                            \end{bmatrix} \)
                         </div>
                     </div>
                 </div>
@@ -65,7 +90,7 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
                     <div class="control-group" style="margin: 0;">
                         <label>Track Limit (±m): <span id="trackVal">5.0</span></label>
-                        <input type="range" id="trackRange" min="1.0" max="10.0" step="0.5" value="5.0">
+                        <input type="range" id="trackRange" min="1.0" max="100.0" step="0.5" value="5.0">
                     </div>
                     <div class="control-group" style="margin: 0;">
                         <label>Cart Mass (kg): <span id="cartMassVal">2.0</span></label>
@@ -98,7 +123,8 @@
                     Goal: Balance the pendulum perfectly upright (\(\theta = 0\)). Turn the PID ON, and challenge it by
                     dragging the mass or the cart left and right!
                 </p>
-                <div style="background-color: var(--bg-color); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 10px;">
+                <div
+                    style="background-color: var(--bg-color); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); margin-top: 10px;">
                     <span style="color: var(--text-secondary);">PID Actuator Force: </span>
                     <span id="torqueDisplay" style="color: var(--success-color); font-weight: bold;">0.00</span>
                 </div>
@@ -106,9 +132,18 @@
         </div>
 
         <div class="panel" style="margin-top: 20px;">
-            <h3>Real-time Metrics: Angle vs. Time</h3>
-            <div class="chart-container">
-                <canvas id="chartCanvas"></canvas>
+            <h3>Real-time Metrics: Absolute & Relative Angle</h3>
+            <div class="chart-container" style="height: 500px; display: flex; flex-direction: column; gap: 20px;">
+                <div style="flex: 1; min-height: 240px; position: relative;">
+                    <h4 style="margin: 0; color: #58a6ff; font-size: 11px; position: absolute; top: 5px; left: 5px; z-index: 5;">Range: 0-360°</h4>
+                    <button id="save360Chart" title="Save Graph" style="position: absolute; top: 5px; right: 5px; z-index: 10; background-color: rgba(33, 38, 45, 0.7); border: 1px solid #30363d; color: #c9d1d9; padding: 2px 4px; font-size: 12px; border-radius: 4px; cursor: pointer;">💾</button>
+                    <canvas id="chartCanvas360"></canvas>
+                </div>
+                <div style="flex: 1; min-height: 240px; position: relative;">
+                    <h4 style="margin: 0; color: #bc8cff; font-size: 11px; position: absolute; top: 5px; left: 5px; z-index: 5;">Range: ±180°</h4>
+                    <button id="save180Chart" title="Save Graph" style="position: absolute; top: 5px; right: 5px; z-index: 10; background-color: rgba(33, 38, 45, 0.7); border: 1px solid #30363d; color: #c9d1d9; padding: 2px 4px; font-size: 12px; border-radius: 4px; cursor: pointer;">💾</button>
+                    <canvas id="chartCanvas180"></canvas>
+                </div>
             </div>
         </div>
     </div>

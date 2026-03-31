@@ -126,14 +126,16 @@
 
         <div class="panel" style="margin-top: 20px;">
             <h3>Real-time Metrics: Angular Velocity vs. Time</h3>
-            <div class="chart-container">
+            <div class="chart-container" style="position: relative;">
+                <button id="saveVelocityChart" title="Save Graph" style="position: absolute; top: 10px; right: 10px; z-index: 10; background-color: rgba(33, 38, 45, 0.7); border: 1px solid #30363d; color: #c9d1d9; padding: 2px 6px; font-size: 14px; border-radius: 4px; cursor: pointer; transition: 0.2s;">💾</button>
                 <canvas id="chartCanvas"></canvas>
             </div>
         </div>
 
         <div class="panel" style="margin-top: 20px;">
             <h3>Real-time Metrics: Angle (Degrees) vs. Time</h3>
-            <div class="chart-container">
+            <div class="chart-container" style="position: relative;">
+                <button id="saveAngleChart" title="Save Graph" style="position: absolute; top: 10px; right: 10px; z-index: 10; background-color: rgba(33, 38, 45, 0.7); border: 1px solid #30363d; color: #c9d1d9; padding: 2px 6px; font-size: 14px; border-radius: 4px; cursor: pointer; transition: 0.2s;">💾</button>
                 <canvas id="degreeChartCanvas"></canvas>
             </div>
         </div>

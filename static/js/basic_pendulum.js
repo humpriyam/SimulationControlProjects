@@ -134,8 +134,17 @@ const chart = new Chart(ctxChart, {
         maintainAspectRatio: false,
         animation: false,
         scales: {
-            x: { display: false },
-            y: { grid: { color: '#30363d' }, ticks: { color: '#c9d1d9' } }
+            x: { 
+                display: true, 
+                title: { display: true, text: 'Time (s)', color: '#c9d1d9' },
+                grid: { color: '#30363d' },
+                ticks: { color: '#c9d1d9', autoSkip: true, maxTicksLimit: 10 }
+            },
+            y: { 
+                title: { display: true, text: 'Angular Velocity (rad/s)', color: '#c9d1d9' },
+                grid: { color: '#30363d' }, 
+                ticks: { color: '#c9d1d9' } 
+            }
         },
         plugins: { legend: { labels: { color: '#c9d1d9' } } }
     }
@@ -160,8 +169,17 @@ const degreeChart = new Chart(ctxDegreeChart, {
         maintainAspectRatio: false,
         animation: false,
         scales: {
-            x: { display: false },
-            y: { grid: { color: '#30363d' }, ticks: { color: '#c9d1d9' } }
+            x: { 
+                display: true, 
+                title: { display: true, text: 'Time (s)', color: '#c9d1d9' },
+                grid: { color: '#30363d' },
+                ticks: { color: '#c9d1d9', autoSkip: true, maxTicksLimit: 10 }
+            },
+            y: { 
+                title: { display: true, text: 'Angle (degrees)', color: '#c9d1d9' },
+                grid: { color: '#30363d' }, 
+                ticks: { color: '#c9d1d9' } 
+            }
         },
         plugins: { legend: { labels: { color: '#c9d1d9' } } }
     }
@@ -202,6 +220,40 @@ ws.onmessage = (event) => {
 
     drawSim();
 };
+
+// Save Chart Functionality
+function downloadChart(canvasId, filename) {
+    const canvas = document.getElementById(canvasId);
+    
+    // Create a temporary link and trigger download
+    const link = document.createElement('a');
+    link.download = filename;
+    
+    // To ensure the background isn't transparent (which looks bad in some viewers),
+    // we take the canvas and draw it onto a new canvas with a background.
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
+    
+    // Draw background
+    tempCtx.fillStyle = '#0d1117'; // Match simulation panel background
+    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    
+    // Draw original canvas over it
+    tempCtx.drawImage(canvas, 0, 0);
+    
+    link.href = tempCanvas.toDataURL('image/png');
+    link.click();
+}
+
+document.getElementById('saveVelocityChart').addEventListener('click', () => {
+    downloadChart('chartCanvas', `pendulum_velocity_${new Date().toISOString().slice(0,10)}.png`);
+});
+
+document.getElementById('saveAngleChart').addEventListener('click', () => {
+    downloadChart('degreeChartCanvas', `pendulum_angle_${new Date().toISOString().slice(0,10)}.png`);
+});
 
 // Pan and Zoom logic
 simCanvas.addEventListener('wheel', (e) => {
