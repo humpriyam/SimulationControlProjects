@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Gate Simulator - Control Systems Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .logic-master-layout {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 160px);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .logic-workspace-row {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        /* --- Top Gate Toolbar --- */
+        .logic-toolbar-top {
+            background: var(--surface-color);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tools-horizontal {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            flex-grow: 1;
+            padding: 4px 0;
+        }
+
+        .tools-horizontal .gate-tool {
+            white-space: nowrap;
+            padding: 8px 16px;
+        }
+
+        .toolbar-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+            border-right: 1px solid var(--glass-border);
+            padding-right: 20px;
+        }
+
+        /* --- Sidebars --- */
+        .logic-sidebar-outer {
+            width: 200px;
+            background: var(--surface-color);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .logic-canvas-area {
+            flex-grow: 1;
+            background: rgba(13, 17, 23, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .gate-tool {
+            padding: 12px 16px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            user-select: none;
+            font-size: 0.85rem;
+        }
+
+        .gate-tool:hover {
+            background: rgba(63, 185, 80, 0.1);
+            border-color: var(--primary-color);
+            transform: scale(1.02);
+        }
+
+        .sidebar-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .canvas-toolbar {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+            align-items: center;
+        }
+
+        .zoom-indicator {
+            padding: 6px 12px;
+            background: var(--surface-color);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--primary-color);
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: monospace;
+        }
+
+        .tool-btn {
+            padding: 8px 16px;
+            background: var(--surface-color);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: var(--glass-bg);
+            border-color: var(--primary-color);
+        }
+
+        .status-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: var(--surface-color);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <button class="menu-dot-btn" id="menuBtn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="/"><span class="icon">🏠</span> Home</a>
+            <div class="dropdown-divider"></div>
+            <a href="/logic-gates">🔌 Logic Gate Lab</a>
+            <a href="/logic-gates/basics">📚 Fundamentals</a>
+            <a href="/logic-gates/workspace">🧪 Interactive Lab</a>
+            <div class="dropdown-divider"></div>
+            <a href="mailto:225EE3016.NITRKL.AC.IN"><span class="icon">📧</span> Contact</a>
+        </div>
+    </div>
+
+    <button id="floatingBackToTop" aria-label="Back to Top" title="Back to Top">
+        <span>🚀</span>
+    </button>
+
+    <div class="header">
+        <h1>Interactive Laboratory</h1>
+        <a href="/logic-gates" class="nav-link">&larr; Back to Logic Lab Hub</a>
+    </div>
+
+    <div class="container">
+        <div class="logic-master-layout">
+            <!-- Top Toolbar: Logic Gates -->
+            <div class="logic-toolbar-top">
+                <div class="toolbar-section-title">Logic Gates</div>
+                <div class="tools-horizontal">
+                    <div class="gate-tool" draggable="true" data-type="AND"><span class="icon">D</span> AND</div>
+                    <div class="gate-tool" draggable="true" data-type="OR"><span class="icon">）</span> OR</div>
+                    <div class="gate-tool" draggable="true" data-type="NOT"><span class="icon">▷</span> NOT</div>
+                    <div class="gate-tool" draggable="true" data-type="NAND"><span class="icon">D○</span> NAND</div>
+                    <div class="gate-tool" draggable="true" data-type="NOR"><span class="icon">）○</span> NOR</div>
+                    <div class="gate-tool" draggable="true" data-type="XOR"><span class="icon">))</span> XOR</div>
+                    <div class="gate-tool" draggable="true" data-type="XNOR"><span class="icon">))○</span> XNOR</div>
+                </div>
+            </div>
+
+            <div class="logic-workspace-row">
+                <!-- Left Sidebar: Inputs -->
+                <div class="logic-sidebar-outer side-left">
+                    <div class="sidebar-title">Inputs</div>
+                    <div class="gate-tool" draggable="true" data-type="SWITCH"><span class="icon">⏻</span> Switch</div>
+                    <div class="gate-tool" draggable="true" data-type="CLOCK"><span class="icon">⏱</span> Clock</div>
+                </div>
+
+                <!-- Center: Workspace Canvas -->
+                <div class="logic-canvas-area" id="canvasContainer">
+                    <div class="canvas-toolbar">
+                        <button class="tool-btn" id="clearCanvas">🗑️ Clear</button>
+                        <button class="tool-btn" id="resetSim">🔄 Reset</button>
+                        <div class="zoom-indicator" id="zoomLevel">Zoom: 100%</div>
+                    </div>
+                    
+                    <div class="properties-panel" id="propertiesPanel">
+                        <div class="panel-header">
+                            <span>Component: <b id="propType">Clock</b></span>
+                        </div>
+                        <div class="panel-content">
+                            <div class="prop-group" id="freqControl">
+                                <label>Frequency: <span id="freqVal">1.0</span> Hz</label>
+                                <input type="range" id="freqSlider" min="0.1" max="10" step="0.1" value="1.0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <canvas id="logicCanvas"></canvas>
+                    <div class="status-panel" id="statusPanel">
+                        Drag tools to workspace • Left click to toggle • Middle-click or Alt+Drag to Pan • Scroll to Zoom
+                    </div>
+                </div>
+
+                <!-- Right Sidebar: Outputs -->
+                <div class="logic-sidebar-outer side-right">
+                    <div class="sidebar-title">Outputs</div>
+                    <div class="gate-tool" draggable="true" data-type="LED"><span class="icon">💡</span> LED Bulb</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>-by <a href="mailto:225EE3016.NITRKL.AC.IN">Pk</a></p>
+    </footer>
+
+    <script src="/static/js/logic_engine.js"></script>
+    <script>
+        // Menu Toggle Logic (Consolidated from index.html)
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const floatingBackToTop = document.getElementById('floatingBackToTop');
+
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                floatingBackToTop.classList.add('show');
+            } else {
+                floatingBackToTop.classList.remove('show');
+            }
+        });
+
+        floatingBackToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Lab Hub - Control Systems Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .hub-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .hub-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--primary-color);
+            box-shadow: var(--card-shadow);
+            background: rgba(63, 185, 80, 0.05);
+        }
+
+        .hub-card .icon {
+            font-size: 3rem;
+            margin-bottom: 24px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hub-card h2 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .hub-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .hub-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <button class="menu-dot-btn" id="menuBtn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="/"><span class="icon">🏠</span> Home</a>
+            <div class="dropdown-divider"></div>
+            <a href="/logic-gates">🔌 Logic Gate Lab</a>
+            <a href="/basic">⚖️ Classic Pendulum</a>
+            <a href="/inverted">🗼 Inverted Pendulum (PID)</a>
+            <div class="dropdown-divider"></div>
+            <a href="mailto:225EE3016.NITRKL.AC.IN"><span class="icon">📧</span> Contact</a>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>Logic Gate Hub</h1>
+        <a href="/" class="nav-link">&larr; Back to Dashboard</a>
+    </div>
+
+    <div class="container">
+        <div class="hub-grid">
+            <a href="/logic-gates/basics" class="hub-card">
+                <div class="icon">📚</div>
+                <h2>Logic Fundamentals</h2>
+                <p>Master the building blocks of digital logic. Interactive truth tables and a deep dive into Universal Gates (NAND/NOR).</p>
+            </a>
+            <a href="/logic-gates/workspace" class="hub-card">
+                <div class="icon">🧪</div>
+                <h2>Interactive Laboratory</h2>
+                <p>An interactive drag-and-drop workspace where you can build and test your own digital circuits from scratch.</p>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <p>-by <a href="mailto:225EE3016.NITRKL.AC.IN">Pk</a></p>
+    </footer>
+
+    <script>
+        // Menu Toggle Logic
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        menuBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
+        document.addEventListener('click', (e) => { if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.remove('show'); });
+    </script>
+</body>
+</html>

@@ -25,6 +25,35 @@ async def basic_pendulum_page(request: Request):
 async def inverted_pendulum_page(request: Request):
     return templates.TemplateResponse(request=request, name="inverted_pendulum.html")
 
+# Placeholder routes for planned projects
+@app.get("/pid-tuner", response_class=HTMLResponse)
+async def pid_tuner_page(request: Request):
+    return HTMLResponse("<h1>PID Tuner - Coming Soon</h1><p>We are building a P5.js interactive tuner for you!</p><a href='/'>Back to Home</a>")
+
+@app.get("/state-space", response_class=HTMLResponse)
+async def state_space_page(request: Request):
+    return HTMLResponse("<h1>State-Space Simulator - Coming Soon</h1><p>Matrix input dashboard is under construction.</p><a href='/'>Back to Home</a>")
+
+@app.get("/root-locus", response_class=HTMLResponse)
+async def root_locus_page(request: Request):
+    return HTMLResponse("<h1>Root Locus Plotter - Coming Soon</h1><p>Dynamic pole-zero migration tools are arriving soon.</p><a href='/'>Back to Home</a>")
+
+@app.get("/bode-nyquist", response_class=HTMLResponse)
+async def bode_page(request: Request):
+    return HTMLResponse("<h1>Bode & Nyquist Plots - Coming Soon</h1><p>Frequency domain analysis tools are being calibrated.</p><a href='/'>Back to Home</a>")
+
+@app.get("/logic-gates", response_class=HTMLResponse)
+async def logic_home(request: Request):
+    return templates.TemplateResponse(request=request, name="logic_gates_home.html")
+
+@app.get("/logic-gates/basics", response_class=HTMLResponse)
+async def logic_basics(request: Request):
+    return templates.TemplateResponse(request=request, name="logic_gates_basics.html")
+
+@app.get("/logic-gates/workspace", response_class=HTMLResponse)
+async def logic_page(request: Request):
+    return templates.TemplateResponse(request=request, name="logic_gates.html")
+
 @app.websocket("/ws/basic")
 async def websocket_basic(websocket: WebSocket):
     await websocket.accept()
@@ -239,3 +268,7 @@ async def websocket_inverted(websocket: WebSocket):
             await asyncio.sleep(dt)
     except Exception as e:
         print(f"Inverted WS error: {e}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8001)

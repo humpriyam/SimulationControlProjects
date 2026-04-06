@@ -11,49 +11,165 @@
     <!-- Use Google Fonts -->
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
 </head>
 
 <body>
+    <div class="menu-container">
+        <button class="menu-dot-btn" id="menuBtn" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="dropdown-menu" id="dropdownMenu">
+            <a href="/"><span class="icon">🏠</span> Home</a>
+            <div class="dropdown-divider"></div>
+            <a href="#logic-link">🔌 Logic Gate Simulator</a>
+            <a href="#basic-pendulum-link">⚖️ Classic Pendulum</a>
+            <a href="#pid-tuner-link">🎮 PID Tuner</a>
+            <a href="#root-locus-link">📈 Root Locus Plotter</a>
+            <a href="#bode-link">📉 Bode & Nyquist Plots</a>
+            <a href="#state-space-link">📊 State-Space Simulator</a>
+            <a href="#lqr-link">🎯 LQR Control</a>
+            <a href="#mpc-link">🧠 MPC Control</a>
+            <a href="#inverted-pendulum-link">🗼 Inverted Pendulum (PID)</a>
+            <div class="dropdown-divider"></div>
+            <a href="mailto:225EE3016.NITRKL.AC.IN"><span class="icon">📧</span> Contact</a>
+        </div>
+    </div>
+
+    <button id="floatingBackToTop" aria-label="Back to Top" title="Back to Top">
+        <span>🚀</span>
+    </button>
+
     <div class="header">
-        <h1>Control Simulations</h1>
+        <h1>Control Systems Laboratory</h1>
     </div>
 
     <div class="container">
         <div class="projects-grid">
+            <!-- Difficulty 1: Easy/Foundation -->
+            <a href="/logic-gates" class="project-card featured" id="logic-link">
+                <div class="icon">🔌</div>
+                <div class="badge active">Active</div>
+                <h2>Logic Gate Simulator</h2>
+                <p>Drag-and-drop interface for building digital logic circuits. Explore the foundation of digital
+                    control systems.</p>
+            </a>
+
+            <!-- Difficulty 2: Fundamental Physics -->
             <a href="/basic" class="project-card" id="basic-pendulum-link">
-                <h2>1. Basic Pendulum</h2>
-                <p>Lwts start with simulating a simple pendulum, with real time interactive environment and see how
-                    length, mass, gravity etc affects the pendulum. We will be using different solvers such as euler,
-                    RungeKutta etc.</p>
+                <div class="icon">⚖️</div>
+                <div class="badge active">Active</div>
+                <h2>Classic Pendulum</h2>
+                <p>Explore simple harmonic motion. Tuning length, mass, and gravity with real-time solver selection
+                    (Euler, Runge-Kutta).</p>
             </a>
 
-            <a href="/inverted" class="project-card" id="inverted-pendulum-link">
-                <h2>2. Inverted Pendulum (PID)</h2>
-                <p>Lets try something complicated ow with inverted pendulum. The satte space model is seen and we will
-                    try to stabilize it using PID controller. Manually disturbances can be given and we also have a
-                    graph for visualising.We will be using Python for the backend as it can do complex calculations and
-                    simulations in real time.</p>
+            <!-- Difficulty 3: PID Tuning -->
+            <a href="/pid-tuner" class="project-card" id="pid-tuner-link">
+                <div class="icon">🎮</div>
+                <div class="badge new">Planned</div>
+                <h2>PID Interactive Tuner</h2>
+                <p>Tune P, I, and D gains dynamically to stabilize systems. Visual feedback with P5.js interactive
+                    blocks or drones.</p>
             </a>
 
-            <!-- Placeholders for future projects -->
-            <a href="#" class="project-card" style="opacity: 0.5; cursor: not-allowed;" id="lqr-link">
-                <h2>3. LQR Control (Coming Soon)</h2>
+            <!-- Difficulty 4: Root Locus Analysis -->
+            <a href="/root-locus" class="project-card" id="root-locus-link">
+                <div class="icon">📈</div>
+                <div class="badge new">Planned</div>
+                <h2>Root Locus Plotter</h2>
+                <p>Dynamic transfer function analysis. Watch poles and zeros migrate as you adjust system parameters.
+                </p>
+            </a>
+
+            <!-- Difficulty 5: Frequency Response -->
+            <a href="/bode-nyquist" class="project-card" id="bode-link">
+                <div class="icon">📉</div>
+                <div class="badge new">Planned</div>
+                <h2>Bode & Nyquist Plots</h2>
+                <p>Frequency domain mastery. Handle complex number math to render precise stability and gain/phase
+                    margin plots.</p>
+            </a>
+
+            <!-- Difficulty 6: State-Space Modeling -->
+            <a href="/state-space" class="project-card" id="state-space-link">
+                <div class="icon">📊</div>
+                <div class="badge new">Planned</div>
+                <h2>State-Space Simulator</h2>
+                <p>Input A, B, C, D matrices and visualize the time-response of multi-variable systems in a clean
+                    dashboard.</p>
+            </a>
+
+            <!-- Difficulty 7: Optimal Control (LQR) -->
+            <a href="#" class="project-card" style="opacity: 0.7; cursor: not-allowed;" id="lqr-link">
+                <div class="icon">🎯</div>
+                <div class="badge new">Planned</div>
+                <h2>LQR Control</h2>
                 <p>Linear-Quadratic Regulator applied to the inverted pendulum and cart-pole systems for optimal state
                     feedback. Will be simulated on python later.</p>
             </a>
 
-            <a href="#" class="project-card" style="opacity: 0.5; cursor: not-allowed;" id="mpc-link">
-                <h2>4. Model Predictive Control For Inverted Pendulum </h2>
-                <p>Coming Soon</p>
+            <!-- Difficulty 8: Model Predictive Control (MPC) -->
+            <a href="#" class="project-card" style="opacity: 0.7; cursor: not-allowed;" id="mpc-link">
+                <div class="icon">🧠</div>
+                <div class="badge new">Planned</div>
+                <h2>Model Predictive Control</h2>
+                <p>Advanced optimization-based control for the inverted pendulum. Predictive modeling for complex
+                    dynamic constraints.</p>
             </a>
 
-            <a href="#" class="project-card" style="opacity: 0.5; cursor: not-allowed;" id="missile-link">
-                <h2>5. Other control Realate dProjects</h2>
-                <p>Coming soon, (such as missile tracking simulation, etc.) </p>
+            <!-- Difficulty 9: Advanced Control Challenge -->
+            <a href="/inverted" class="project-card featured" id="inverted-pendulum-link">
+                <div class="icon">🗼</div>
+                <div class="badge active">Active</div>
+                <h2>Inverted Pendulum (PID)</h2>
+                <p>The ultimate control challenge. Stabilize a cart-pole system using a custom PID controller with
+                    real-time state-space telemetry.</p>
             </a>
         </div>
     </div>
+
+    <footer>
+        <p>-by <a href="mailto:225EE3016.NITRKL.AC.IN">Pk</a></p>
+    </footer>
+
+    <script>
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const floatingBackToTop = document.getElementById('floatingBackToTop');
+
+        // Toggle dropdown menu
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
+        // Show/hide floating back-to-top button on scroll
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                floatingBackToTop.classList.add('show');
+            } else {
+                floatingBackToTop.classList.remove('show');
+            }
+        });
+
+        // Smooth scroll to top when floating button is clicked
+        floatingBackToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
 </body>
 
 </html>
