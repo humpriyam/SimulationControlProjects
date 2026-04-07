@@ -15,32 +15,7 @@
 </head>
 
 <body>
-    <div class="menu-container">
-        <button class="menu-dot-btn" id="menuBtn" aria-label="Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-        <div class="dropdown-menu" id="dropdownMenu">
-            <a href="/"><span class="icon">🏠</span> Home</a>
-            <div class="dropdown-divider"></div>
-            <a href="#logic-link">🔌 Logic Gate Simulator</a>
-            <a href="#basic-pendulum-link">⚖️ Classic Pendulum</a>
-            <a href="#pid-tuner-link">🎮 PID Tuner</a>
-            <a href="#root-locus-link">📈 Root Locus Plotter</a>
-            <a href="#bode-link">📉 Bode & Nyquist Plots</a>
-            <a href="#state-space-link">📊 State-Space Simulator</a>
-            <a href="#lqr-link">🎯 LQR Control</a>
-            <a href="#mpc-link">🧠 MPC Control</a>
-            <a href="#inverted-pendulum-link">🗼 Inverted Pendulum (PID)</a>
-            <div class="dropdown-divider"></div>
-            <a href="mailto:225EE3016.NITRKL.AC.IN"><span class="icon">📧</span> Contact</a>
-        </div>
-    </div>
-
-    <button id="floatingBackToTop" aria-label="Back to Top" title="Back to Top">
-        <span>🚀</span>
-    </button>
+    {% include 'components/universal_menu.html' %}
 
     <div class="header">
         <h1>Control Systems Laboratory</h1>
@@ -69,7 +44,7 @@
             <!-- Difficulty 3: PID Tuning -->
             <a href="/pid-tuner" class="project-card" id="pid-tuner-link">
                 <div class="icon">🎮</div>
-                <div class="badge new">Planned</div>
+                <div class="badge active">Active</div>
                 <h2>PID Interactive Tuner</h2>
                 <p>Tune P, I, and D gains dynamically to stabilize systems. Visual feedback with P5.js interactive
                     blocks or drones.</p>
@@ -132,44 +107,9 @@
     </div>
 
     <footer>
-        <p>-by <a href="mailto:225EE3016.NITRKL.AC.IN">Pk</a></p>
+        <p>-by <a href="mailto:225ee3016+unofficialSimulationWebsite@nitrkl.ac.in">Pk</a></p>
     </footer>
 
-    <script>
-        const menuBtn = document.getElementById('menuBtn');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        const floatingBackToTop = document.getElementById('floatingBackToTop');
-
-        // Toggle dropdown menu
-        menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdownMenu.classList.toggle('show');
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-                dropdownMenu.classList.remove('show');
-            }
-        });
-
-        // Show/hide floating back-to-top button on scroll
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                floatingBackToTop.classList.add('show');
-            } else {
-                floatingBackToTop.classList.remove('show');
-            }
-        });
-
-        // Smooth scroll to top when floating button is clicked
-        floatingBackToTop.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
-    </script>
 </body>
 
 </html>

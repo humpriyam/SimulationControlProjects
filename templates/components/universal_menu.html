@@ -1,0 +1,66 @@
+<!-- Universal Navigation Component -->
+<div class="menu-container">
+    <button class="menu-dot-btn" id="menuBtn" aria-label="Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="dropdown-menu" id="dropdownMenu">
+        <a href="/"><span class="icon">🏠</span> Home</a>
+        <div class="dropdown-divider"></div>
+        <a href="/logic-gates">🔌 Logic Gate Lab</a>
+        <a href="/basic">⚖️ Classic Pendulum</a>
+        <a href="/pid-tuner">🎮 PID Tuner</a>
+        <a href="/inverted">🗼 Inverted Pendulum</a>
+        <div class="dropdown-divider"></div>
+        <!-- Future projects can be added here once -->
+        <a href="mailto:225ee3016+unofficialSimulationWebsite@nitrkl.ac.in"><span class="icon">📧</span> Contact</a>
+    </div>
+</div>
+
+<button id="floatingBackToTop" aria-label="Back to Top" title="Back to Top">
+    <span>🚀</span>
+</button>
+
+<script>
+    /**
+     * Universal Menu & Navigation Logic
+     * Centralized for all Simulation Control Projects
+     */
+    (function () {
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const floatingBackToTop = document.getElementById('floatingBackToTop');
+
+        if (menuBtn && dropdownMenu) {
+            // Toggle menu on click
+            menuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+        }
+
+        if (floatingBackToTop) {
+            // Show/Hide back to top based on scroll position
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    floatingBackToTop.classList.add('show');
+                } else {
+                    floatingBackToTop.classList.remove('show');
+                }
+            });
+
+            // Smooth scroll to top
+            floatingBackToTop.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    })();
+</script>

@@ -63,22 +63,7 @@
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <button class="menu-dot-btn" id="menuBtn" aria-label="Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-        <div class="dropdown-menu" id="dropdownMenu">
-            <a href="/"><span class="icon">🏠</span> Home</a>
-            <div class="dropdown-divider"></div>
-            <a href="/logic-gates">🔌 Logic Gate Lab</a>
-            <a href="/basic">⚖️ Classic Pendulum</a>
-            <a href="/inverted">🗼 Inverted Pendulum (PID)</a>
-            <div class="dropdown-divider"></div>
-            <a href="mailto:225EE3016.NITRKL.AC.IN"><span class="icon">📧</span> Contact</a>
-        </div>
-    </div>
+    {% include 'components/universal_menu.html' %}
 
     <div class="header">
         <h1>Logic Gate Hub</h1>
@@ -101,15 +86,8 @@
     </div>
 
     <footer>
-        <p>-by <a href="mailto:225EE3016.NITRKL.AC.IN">Pk</a></p>
+        <p>-by <a href="mailto:225ee3016+unofficialSimulationWebsite@nitrkl.ac.in">Pk</a></p>
     </footer>
 
-    <script>
-        // Menu Toggle Logic
-        const menuBtn = document.getElementById('menuBtn');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        menuBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdownMenu.classList.toggle('show'); });
-        document.addEventListener('click', (e) => { if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) dropdownMenu.classList.remove('show'); });
-    </script>
 </body>
 </html>

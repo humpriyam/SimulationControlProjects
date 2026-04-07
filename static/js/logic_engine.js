@@ -230,6 +230,7 @@ class LogicEngine {
         this.freqSlider = document.getElementById('freqSlider');
         this.freqVal = document.getElementById('freqVal');
         this.zoomDisplay = document.getElementById('zoomLevel');
+        this.deleteBtn = document.getElementById('deleteGate');
 
         this.init();
     }
@@ -256,6 +257,10 @@ class LogicEngine {
                     this.freqVal.textContent = this.selectedGate.frequency.toFixed(1);
                 }
             });
+        }
+        
+        if (this.deleteBtn) {
+            this.deleteBtn.addEventListener('click', () => this.deleteSelected());
         }
 
         const container = document.getElementById('canvasContainer');
@@ -517,6 +522,15 @@ class LogicEngine {
         this.gates.forEach(g => {
             g.active = false;
         });
+    }
+
+    deleteSelected() {
+        if (!this.selectedGate) return;
+        const gateToDelete = this.selectedGate;
+        this.gates = this.gates.filter(g => g !== gateToDelete);
+        this.wires = this.wires.filter(w => w.startPin.parent !== gateToDelete && w.endPin.parent !== gateToDelete);
+        this.selectedGate = null;
+        this.hideProperties();
     }
 }
 

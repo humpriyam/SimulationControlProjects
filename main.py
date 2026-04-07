@@ -28,7 +28,7 @@ async def inverted_pendulum_page(request: Request):
 # Placeholder routes for planned projects
 @app.get("/pid-tuner", response_class=HTMLResponse)
 async def pid_tuner_page(request: Request):
-    return HTMLResponse("<h1>PID Tuner - Coming Soon</h1><p>We are building a P5.js interactive tuner for you!</p><a href='/'>Back to Home</a>")
+    return templates.TemplateResponse(request=request, name="pid_tuner.html")
 
 @app.get("/state-space", response_class=HTMLResponse)
 async def state_space_page(request: Request):

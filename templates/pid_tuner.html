@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive PID Tuner - Control Systems Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- P5.js for the main animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <!-- Chart.js for real-time visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #p5-container {
+            width: 100%;
+            height: 400px;
+            background: #010409;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pid-visual-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .metric-pill {
+            padding: 4px 12px;
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .metric-pill b {
+            color: var(--primary-color);
+        }
+
+        .weather-select {
+            background: rgba(13, 17, 23, 0.9);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .weather-select:hover {
+            border-color: var(--primary-color);
+        }
+
+        .pill-bar-container {
+            width: 60px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .pill-bar {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'components/universal_menu.html' %}
+
+    <div class="header">
+        <h1>Interactive PID Tuner</h1>
+        <a href="/" class="nav-link">&larr; Back to Dashboard</a>
+    </div>
+
+    <div class="container">
+        <div class="sim-layout">
+            <!-- Left Side: P5.js Drone Simulation -->
+            <div class="panel" style="flex: 1.5;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>Drone Altitude Simulation</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="weatherSelect" class="weather-select">
+                            <option value="clear">☀️ Clear Sky</option>
+                            <option value="slight_wind">🍃 Slight Wind</option>
+                            <option value="wind">🌬️ Heavy Wind</option>
+                            <option value="slight_rain">💧 Slight Rain</option>
+                            <option value="rain">🌧️ Heavy Rain</option>
+                            <option value="slight_hail">🧊 Slight Hail</option>
+                            <option value="hail">⛈️ Hail Storm</option>
+                        </select>
+                        <button id="randomizeWind" class="btn" style="width: auto; padding: 4px 10px; font-size: 0.8rem; background-color: #21262d; border: 1px solid var(--glass-border); display: none;">🔀 Randomize Direction</button>
+                        <button id="playPauseBtn" class="btn" style="width: auto; padding: 4px 16px; font-weight: bold; background-color: #3fb950; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: 0.2s;">
+                            ▶ Start Simulation
+                        </button>
+                        <button id="resetSim" class="btn" style="width: auto; padding: 4px 12px; font-size: 0.8rem; background-color: #21262d; border: 1px solid var(--glass-border);">🔄 Reset</button>
+                    </div>
+                </div>
+                
+                <div id="p5-container">
+                    <div class="pid-visual-overlay">
+                        <div class="metric-pill">Error: <b id="errorMetric">0.00</b> m</div>
+                        <div class="metric-pill">Effort: <b id="effortMetric">0.00</b> N</div>
+                        <div class="dropdown-divider" style="margin: 5px 0; opacity: 0.3;"></div>
+                        <div class="metric-pill">P Contribution <div class="pill-bar-container"><div id="pBar" class="pill-bar"></div></div></div>
+                        <div class="metric-pill">I Contribution <div class="pill-bar-container"><div id="iBar" class="pill-bar" style="background: #58a6ff;"></div></div></div>
+                        <div class="metric-pill">D Contribution <div class="pill-bar-container"><div id="dBar" class="pill-bar" style="background: #bc8cff;"></div></div></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; display: flex; gap: 15px;">
+                    <div style="flex: 1; padding: 15px; background: rgba(63, 185, 80, 0.05); border-radius: 8px; border: 1px solid var(--glass-border);">
+                        <h4 style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--primary-color);">What is PID?</h4>
+                        <p style="font-size: 0.8rem; line-height: 1.5; color: var(--text-secondary); margin: 0;">
+                            <b>Proportional (P)</b>: Corrects based on current error.<br>
+                            <b>Integral (I)</b>: Accumulates past errors to eliminate steady-state offset.<br>
+                            <b>Derivative (D)</b>: Predicts future error to dampen oscillations.<br>
+                            <span style="color: var(--primary-color); display: block; margin-top: 8px;">
+                                💡 <b>Left Click</b> to PUSH drone away from cursor<br>
+                                🎯 <b>Right-Click Hold</b> to Charge & Throw Stone (Guaranteed Hit!)<br>
+                                🎥 <b>Camera</b> follows the drone's horizontal drift!
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Controls and Graphs -->
+            <div class="panel" style="flex: 1;">
+                <h3>Controller Tuning</h3>
+                
+                <div class="control-group">
+                    <label>Proportional ($K_p$): <span id="kpVal">1.50</span></label>
+                    <input type="range" id="kpRange" min="0" max="6" step="0.01" value="1.5">
+                </div>
+                
+                <div class="control-group">
+                    <label>Integral ($K_i$): <span id="kiVal">0.02</span></label>
+                    <input type="range" id="kiRange" min="0" max="0.5" step="0.001" value="0.02">
+                </div>
+                
+                <div class="control-group">
+                    <label>Derivative ($K_d$): <span id="kdVal">0.40</span></label>
+                    <input type="range" id="kdRange" min="0" max="2" step="0.005" value="0.40">
+                </div>
+
+                <div class="dropdown-divider" style="margin: 25px 0;"></div>
+
+                <div class="control-group">
+                    <label>Target Altitude: <span id="setpointVal">200</span> px</label>
+                    <input type="range" id="setpointRange" min="50" max="350" step="1" value="200">
+                </div>
+
+                <div class="chart-container" style="height: 250px; position: relative;">
+                    <button id="saveChart" title="Save Graph" style="position: absolute; top: 10px; right: 10px; z-index: 10; background-color: rgba(33, 38, 45, 0.7); border: 1px solid #30363d; color: #c9d1d9; padding: 2px 6px; font-size: 14px; border-radius: 4px; cursor: pointer; transition: 0.2s;">💾</button>
+                    <canvas id="pidChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>-by <a href="mailto:225ee3016+unofficialSimulationWebsite@nitrkl.ac.in">Pk</a></p>
+    </footer>
+
+    <script src="/static/js/pid_tuner.js"></script>
+</body>
+</html>

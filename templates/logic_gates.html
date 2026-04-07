@@ -177,26 +177,7 @@
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <button class="menu-dot-btn" id="menuBtn" aria-label="Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-        <div class="dropdown-menu" id="dropdownMenu">
-            <a href="/"><span class="icon">🏠</span> Home</a>
-            <div class="dropdown-divider"></div>
-            <a href="/logic-gates">🔌 Logic Gate Lab</a>
-            <a href="/logic-gates/basics">📚 Fundamentals</a>
-            <a href="/logic-gates/workspace">🧪 Interactive Lab</a>
-            <div class="dropdown-divider"></div>
-            <a href="mailto:225EE3016.NITRKL.AC.IN"><span class="icon">📧</span> Contact</a>
-        </div>
-    </div>
-
-    <button id="floatingBackToTop" aria-label="Back to Top" title="Back to Top">
-        <span>🚀</span>
-    </button>
+    {% include 'components/universal_menu.html' %}
 
     <div class="header">
         <h1>Interactive Laboratory</h1>
@@ -238,6 +219,7 @@
                     <div class="properties-panel" id="propertiesPanel">
                         <div class="panel-header">
                             <span>Component: <b id="propType">Clock</b></span>
+                            <button id="deleteGate" style="background: none; border: none; color: #f85149; cursor: pointer; font-size: 1.2rem; transition: transform 0.2s;" title="Delete Component">🗑️</button>
                         </div>
                         <div class="panel-content">
                             <div class="prop-group" id="freqControl">
@@ -249,7 +231,7 @@
 
                     <canvas id="logicCanvas"></canvas>
                     <div class="status-panel" id="statusPanel">
-                        Drag tools to workspace • Left click to toggle • Middle-click or Alt+Drag to Pan • Scroll to Zoom
+                        Drag tools to workspace • Left click to select/toggle • Right-click or Panel Trash to Delete
                     </div>
                 </div>
 
@@ -263,38 +245,9 @@
     </div>
 
     <footer>
-        <p>-by <a href="mailto:225EE3016.NITRKL.AC.IN">Pk</a></p>
+        <p>-by <a href="mailto:225ee3016+unofficialSimulationWebsite@nitrkl.ac.in">Pk</a></p>
     </footer>
 
     <script src="/static/js/logic_engine.js"></script>
-    <script>
-        // Menu Toggle Logic (Consolidated from index.html)
-        const menuBtn = document.getElementById('menuBtn');
-        const dropdownMenu = document.getElementById('dropdownMenu');
-        const floatingBackToTop = document.getElementById('floatingBackToTop');
-
-        menuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdownMenu.classList.toggle('show');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
-                dropdownMenu.classList.remove('show');
-            }
-        });
-
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                floatingBackToTop.classList.add('show');
-            } else {
-                floatingBackToTop.classList.remove('show');
-            }
-        });
-
-        floatingBackToTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    </script>
 </body>
 </html>
